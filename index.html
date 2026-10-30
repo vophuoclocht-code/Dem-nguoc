@@ -416,7 +416,7 @@ if("serviceWorker" in navigator){ window.addEventListener("load",function(){ nav
     if(!force&&n.key===lastKey) return;
     lastKey=n.key;
     navigator.serviceWorker.ready.then(function(r){
-      return r.showNotification(n.title,{body:n.body,icon:"icon-192.png",badge:"badge-96.png",tag:TAG,renotify:false,silent:true,requireInteraction:true,timestamp:Date.now()});
+      return r.showNotification(n.title,{body:n.body,badge:"badge-96.png",tag:TAG,renotify:false,silent:true,requireInteraction:true,timestamp:Date.now()});
     }).catch(function(){});
   }
   bell.addEventListener("click",function(){
