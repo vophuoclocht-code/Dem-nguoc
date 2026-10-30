@@ -10,6 +10,8 @@
     }
     return best;
   };
+  function z2(n){ return (n<10?"0":"")+n; }
+  g.ymd=function(ts){ var d=new Date(ts); return d.getFullYear()+"-"+z2(d.getMonth()+1)+"-"+z2(d.getDate()); };
   g.buildNote=function(items,now){
     now=now||Date.now();
     var up=(items||[]).map(function(i){
@@ -19,7 +21,7 @@
     if(!up.length) return null;
     var f=up[0], s=Math.floor(f.ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600);
     var time=d>0?d+" ngày "+h+" giờ":h>0?h+" giờ":"dưới 1 giờ";
-    var tk=f.i.tasks||[], dn=tk.filter(function(t){return t.done;}).length;
+    var tk=f.i.tasks||[], td=g.ymd(now), dn=tk.filter(function(t){return t.done&&(!t.rep||t.last===td);}).length;
     return {title:f.i.name,body:"Còn "+time+" · "+dn+"/"+tk.length};
   };
   function get(scope,name){
