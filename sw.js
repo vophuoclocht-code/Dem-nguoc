@@ -23,7 +23,7 @@ self.addEventListener("periodicsync",function(e){
     if(!d||!d.on) return;
     var n=self.buildNote(d.items);
     if(!n) return self.registration.getNotifications({tag:"dem-nguoc"}).then(function(l){ l.forEach(function(x){x.close();}); });
-    return self.registration.showNotification(n.title,{body:n.body,icon:"icon-192.png",badge:"badge-96.png",tag:"dem-nguoc",renotify:false,silent:true,requireInteraction:true,timestamp:Date.now()});
+    return self.registration.showNotification(n.title,{body:n.body,badge:"badge-96.png",tag:"dem-nguoc",renotify:false,silent:true,requireInteraction:true,timestamp:Date.now()});
   }).catch(function(){}));
 });
 self.addEventListener("notificationclick",function(e){
