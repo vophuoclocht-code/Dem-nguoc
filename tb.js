@@ -1,4 +1,15 @@
 (function(g){
+  var SLOTS=[6,13,19];
+  g.lastSlot=function(now){
+    var d=new Date(now), best=0;
+    for(var k=0;k<2;k++){
+      SLOTS.forEach(function(h){
+        var t=new Date(d.getFullYear(),d.getMonth(),d.getDate()-k,h,0,0,0).getTime();
+        if(t<=now&&t>best) best=t;
+      });
+    }
+    return best;
+  };
   g.buildNote=function(items,now){
     now=now||Date.now();
     var up=(items||[]).map(function(i){
@@ -11,11 +22,26 @@
     var tk=f.i.tasks||[], dn=tk.filter(function(t){return t.done;}).length;
     return {title:f.i.name,body:"Còn "+time+" · "+dn+"/"+tk.length};
   };
-  /* mốc thông báo gần nhất đã qua: 6h, 13h, 19h mỗi ngày */
-  g.lastSlot=function(now){
-    var d=new Date(now), y=d.getFullYear(), m=d.getMonth(), day=d.getDate();
-    var best=new Date(y,m,day-1,19,0,0,0).getTime();
-    [6,13,19].forEach(function(h){ var t=new Date(y,m,day,h,0,0,0).getTime(); if(t<=now) best=t; });
-    return best;
+  function get(scope,name){
+    return caches.open("dem-data").then(function(c){return c.match(scope+name);}).then(function(r){return r?r.json():null;}).catch(function(){return null;});
+  }
+  function put(scope,name,obj){
+    return caches.open("dem-data").then(function(c){
+      return c.put(scope+name,new Response(JSON.stringify(obj),{headers:{"Content-Type":"application/json"}}));
+    }).catch(function(){});
+  }
+  g.saveData=function(reg,obj){ return put(reg.scope,"data.json",obj); };
+  g.loadData=function(reg){ return get(reg.scope,"data.json"); };
+  // Đến khung giờ 6h / 13h / 19h (hoặc đã qua mà chưa báo) thì gửi thông báo một lần
+  g.checkSlot=function(reg,items,force){
+    var now=Date.now(), slot=g.lastSlot(now);
+    return get(reg.scope,"state.json").then(function(st){
+      if(!force&&st&&st.shown>=slot) return;
+      var n=g.buildNote(items,now);
+      if(!n) return reg.getNotifications({tag:"dem-nguoc"}).then(function(l){ l.forEach(function(x){x.close();}); });
+      return put(reg.scope,"state.json",{shown:slot}).then(function(){
+        return reg.showNotification(n.title,{body:n.body,icon:"notify-icon.png",badge:"badge-96.png",tag:"dem-nguoc",renotify:true,vibrate:[200,100,200],timestamp:now});
+      });
+    }).catch(function(){});
   };
 })(typeof self!=="undefined"?self:window);

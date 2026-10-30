@@ -1,36 +1,53 @@
 importScripts("tb.js");
 var V="dem-nguoc-v7";
-var FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./badge-96.png","./blank.png","./tb.js"];
+var FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./badge-96.png","./notify-icon.png","./tb.js"];
 self.addEventListener("install",function(e){
-  e.waitUntil(caches.open(V).then(function(c){return c.addAll(FILES);}).then(function(){return self.skipWaiting();}));
+  e.waitUntil(caches.open(V).then(function(c){
+    return Promise.all(FILES.map(function(f){return c.add(f).catch(function(){});}));
+  }).then(function(){return self.skipWaiting();}));
 });
 self.addEventListener("activate",function(e){
   e.waitUntil(caches.keys().then(function(k){
     return Promise.all(k.filter(function(n){return n!==V&&n!=="dem-data";}).map(function(n){return caches.delete(n);}));
   }).then(function(){return self.clients.claim();}));
 });
+// Phản hồi đã bị chuyển hướng không dùng được cho trang chính (gây lỗi khi tải lại) -> tạo bản sao sạch
+function clean(res){
+  if(!res.redirected) return Promise.resolve(res);
+  return res.blob().then(function(b){return new Response(b,{status:res.status,statusText:res.statusText,headers:res.headers});});
+}
+function fromCache(req){
+  if(req.mode==="navigate") return caches.match("./index.html");
+  return caches.match(req,{ignoreSearch:true});
+}
 self.addEventListener("fetch",function(e){
-  if(e.request.method!=="GET") return;
-  e.respondWith(caches.match(e.request,{ignoreSearch:true}).then(function(r){
-    return r||fetch(e.request).then(function(res){
-      var cp=res.clone(); caches.open(V).then(function(c){c.put(e.request,cp);}); return res;
-    }).catch(function(){return caches.match("./index.html");});
+  var req=e.request;
+  if(req.method!=="GET"||new URL(req.url).origin!==self.location.origin) return;
+  e.respondWith(new Promise(function(resolve){
+    var done=false;
+    function fin(r){ if(!done&&r){ done=true; resolve(r); } }
+    var t=setTimeout(function(){ fromCache(req).then(fin); },3000);
+    fetch(req).then(function(res){
+      clearTimeout(t);
+      if(res&&res.ok&&res.type==="basic"){
+        clean(res.clone()).then(function(x){
+          caches.open(V).then(function(c){ c.put(req.mode==="navigate"?"./index.html":req,x); });
+        });
+      }
+      return clean(res).then(fin);
+    }).catch(function(){
+      clearTimeout(t);
+      fromCache(req).then(function(r){
+        if(r) fin(r); else if(!done){ done=true; resolve(Response.error()); }
+      });
+    });
   }));
 });
 self.addEventListener("periodicsync",function(e){
   if(e.tag!=="dem-nguoc-tick") return;
-  e.waitUntil(caches.open("dem-data").then(function(c){
-    return Promise.all([c.match("data.json"),c.match("slot.json")]).then(function(rs){
-      return Promise.all([rs[0]?rs[0].json():null,rs[1]?rs[1].json():null]);
-    }).then(function(v){
-      var d=v[0], o=v[1], slot=self.lastSlot(Date.now());
-      if(!d||!d.on||(o&&o.slot>=slot)) return;
-      var n=self.buildNote(d.items);
-      return c.put("slot.json",new Response(JSON.stringify({slot:slot}),{headers:{"Content-Type":"application/json"}})).then(function(){
-        if(!n) return self.registration.getNotifications({tag:"dem-nguoc"}).then(function(l){ l.forEach(function(x){x.close();}); });
-        return self.registration.showNotification(n.title,{body:n.body,icon:"blank.png",badge:"badge-96.png",tag:"dem-nguoc",renotify:true,silent:false,requireInteraction:true,timestamp:Date.now()});
-      });
-    });
+  e.waitUntil(self.loadData(self.registration).then(function(d){
+    if(!d||!d.on) return;
+    return self.checkSlot(self.registration,d.items,false);
   }).catch(function(){}));
 });
 self.addEventListener("notificationclick",function(e){
