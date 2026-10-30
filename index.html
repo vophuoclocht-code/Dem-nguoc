@@ -133,13 +133,18 @@ textarea{min-height:110px}
 .fab{width:60px;height:60px;box-shadow:0 6px 16px rgba(37,99,235,.35)}
 form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
 @media (max-width:380px){main{padding-left:12px;padding-right:12px}h1{font-size:1.5rem}li.k .r b{font-size:1.15rem}li.k .r span{margin-right:5px}}
+.th{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.th h1{margin:0}
+.bell{width:44px;height:44px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;padding:0}
+.bell.on{background:var(--calm);color:#fff}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:#0f1728;color:#fff;border-radius:99px;padding:10px 18px;font-size:.9rem;z-index:20;max-width:calc(100% - 32px);text-align:center}
 </style>
 </head>
 <body>
 <main>
   <div class="warn" id="warn" hidden>Trình duyệt đang chặn lưu dữ liệu, các môn thi sẽ mất khi đóng trang.</div>
   <section id="v-dem">
-    <h1>Đếm ngược</h1>
+    <div class="th"><h1>Đếm ngược</h1><button class="bell" id="bell" type="button" aria-label="Thông báo" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button></div>
     <h2 id="nh" class="first">Môn thi sắp tới</h2>
     <section class="hero" id="hero"></section>
     <h2 id="uh">Môn thi còn lại</h2>
@@ -151,21 +156,21 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
   <section id="v-them" hidden>
     <div class="top"><a class="back" href="#dem" aria-label="Quay lại">←</a><h1 id="ftitle">Thêm môn thi</h1></div>
     <form id="f">
-      <div class="w"><label for="name">Tên môn thi</label><input id="name" required maxlength="60" placeholder="Ví dụ: Toán cao cấp"></div>
+      <div class="w"><label for="name">Tên môn thi</label><input id="name" required maxlength="60"></div>
       <div><label for="date">Ngày thi</label><input id="date" type="date" required></div>
       <div><label for="time">Giờ thi</label><input id="time" type="time" value="07:30" required></div>
-      <div class="w"><label for="note">Chi tiết</label><textarea id="note" rows="4" maxlength="2000" placeholder="Phòng thi, hình thức thi, tài liệu được mang vào, lưu ý... (bấm Enter để xuống dòng)"></textarea></div>
+      <div class="w"><label for="note">Chi tiết</label><textarea id="note" rows="4" maxlength="2000"></textarea></div>
       <button class="add" id="sub" type="submit">Thêm môn thi</button>
       <button class="cancel" id="cancel" type="button" hidden>Hủy sửa</button>
       <div class="msg" id="msg" aria-live="polite"></div>
     </form>
-    <h2>Danh sách đã thêm (bấm vào môn để sửa)</h2>
+    <h2>Danh sách đã thêm</h2>
     <ul id="manage"></ul>
     <h2>Sao lưu dữ liệu</h2>
     <div class="bk">
       <button type="button" class="cancel" id="bk-copy">Sao chép toàn bộ dữ liệu</button>
-      <textarea id="bk-box" rows="3" placeholder="Dán dữ liệu đã sao chép vào đây để khôi phục"></textarea>
-      <button type="button" class="cancel" id="bk-restore">Khôi phục (thay thế danh sách hiện tại)</button>
+      <textarea id="bk-box" rows="3" placeholder="Dán dữ liệu vào đây"></textarea>
+      <button type="button" class="cancel" id="bk-restore">Khôi phục</button>
       <div class="msg" id="bk-msg" aria-live="polite"></div>
     </div>
   </section>
@@ -176,9 +181,10 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
     <section class="detail" id="tk-detail" hidden></section>
     <h2>Việc cần làm</h2>
     <ul id="tasks"></ul>
-    <form id="tf" class="tf" hidden><input id="tin" maxlength="100" required placeholder="Ví dụ: Ôn chương 3" aria-label="Việc cần làm"><button class="tadd" type="submit">Thêm</button></form>
+    <form id="tf" class="tf" hidden><input id="tin" maxlength="100" required placeholder="Việc cần làm" aria-label="Việc cần làm"><button class="tadd" type="submit">Thêm</button></form>
   </section>
 </main>
+<div class="toast" id="toast" hidden></div>
 <a class="fab" id="fab" href="#them" aria-label="Thêm môn thi">+</a>
 <button class="fab" id="tfab" type="button" aria-label="Thêm việc" hidden>+</button>
 
@@ -230,7 +236,7 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
     } else {
       hero.className="hero none"; hero.onclick=null; hero.removeAttribute("tabindex"); hero.removeAttribute("role");
       hero.appendChild(el("div","name",items.length?"Bạn đã thi xong tất cả các môn.":"Chưa có môn thi nào."));
-      if(!items.length) hero.appendChild(el("div","when","Bấm nút + ở góc dưới để thêm môn đầu tiên."));
+      
     }
     $("nh").hidden=!up.length; $("uh").hidden=up.length<2;
     var u=$("upcoming"), pl=$("past"); u.innerHTML=""; pl.innerHTML="";
@@ -295,9 +301,9 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
     var dv=$("tk-detail"), has=!!(it.note&&it.note.trim()); dv.innerHTML=""; dv.hidden=false; dv.style.setProperty("--c",ms>0?color(ms):"var(--done)");
     var dh=el("div","dh"), de=el("button","de",has?"Sửa":"Thêm"); de.type="button"; de.onclick=function(){ location.hash="#them"; startEdit(it); };
     dh.appendChild(el("div","dl","Chi tiết")); dh.appendChild(de); dv.appendChild(dh);
-    dv.appendChild(el("div","dt"+(has?"":" none"),has?it.note:"Chưa có chi tiết. Bấm “Thêm” để ghi phòng thi, hình thức thi, tài liệu cần mang."));
+    dv.appendChild(el("div","dt"+(has?"":" none"),has?it.note:"Chưa có chi tiết."));
     var ul=$("tasks"); ul.innerHTML="";
-    if(!tk.length){ ul.appendChild(el("li","empty","Bấm nút + để thêm việc cần làm trước khi thi: ôn từng chương, làm đề, chuẩn bị đồ dùng.")); return; }
+    if(!tk.length){ ul.appendChild(el("li","empty","Chưa có việc nào.")); return; }
     tk.forEach(function(t){
       var ix=tk.indexOf(t), li=el("li","tk"+(t.done?" done":"")), ck=el("button","ck",t.done?"✓":""), hd=el("button","hd","≡"); hd.type="button"; hd.setAttribute("aria-label","Kéo để đổi vị trí: "+t.text); dragInit(hd,li,ix,it); ck.type="button"; ck.setAttribute("aria-label",(t.done?"Bỏ đánh dấu: ":"Đánh dấu xong: ")+t.text);
       function tog(){ t.done=!t.done; save(); renderTask(); }
@@ -355,8 +361,8 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
   });
   $("bk-copy").addEventListener("click",function(){
     var s=JSON.stringify(items), m=$("bk-msg");
-    function fb(){ var b=$("bk-box"); b.value=s; b.focus(); b.select(); m.textContent="Dữ liệu đang hiện trong ô bên trên. Hãy chọn hết và sao chép."; }
-    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(function(){ m.textContent="Đã sao chép. Hãy dán vào ghi chú hoặc tin nhắn để giữ lại."; },fb); } else fb();
+    function fb(){ var b=$("bk-box"); b.value=s; b.focus(); b.select(); m.textContent="Hãy sao chép dữ liệu trong ô."; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(function(){ m.textContent="Đã sao chép."; },fb); } else fb();
   });
   $("bk-restore").addEventListener("click",function(){
     var m=$("bk-msg");
@@ -381,6 +387,57 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
 </script>
 <script>
 if("serviceWorker" in navigator){ window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+</script>
+<script>
+(function(){
+  var bell=document.getElementById("bell"), toast=document.getElementById("toast"), tt;
+  if(!("serviceWorker" in navigator)||!("Notification" in window)){ bell.hidden=true; return; }
+  var KEY="exam-countdown-v1", FLAG="exam-notify", TAG="dem-nguoc";
+  function say(t){ toast.textContent=t; toast.hidden=false; clearTimeout(tt); tt=setTimeout(function(){ toast.hidden=true; },2600); }
+  function on(){ try{ return localStorage.getItem(FLAG)==="1"&&Notification.permission==="granted"; }catch(e){ return false; } }
+  function paint(){ var o=on(); bell.classList.toggle("on",o); bell.setAttribute("aria-pressed",o?"true":"false"); }
+  function load(){ try{ var a=JSON.parse(localStorage.getItem(KEY)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function tgt(i){ var p=i.date.split("-").map(Number), t=(i.time||"07:30").split(":").map(Number); return new Date(p[0],p[1]-1,p[2],t[0],t[1]).getTime(); }
+  function pr(ms){ var s=Math.floor(ms/1000); return {d:Math.floor(s/86400),h:Math.floor(s%86400/3600),m:Math.floor(s%3600/60)}; }
+  function G(ms){ return ms<=3*864e5?["#be123c","#f43f5e"]:ms<=7*864e5?["#c2410c","#f59e0b"]:["#2563eb","#06b6d4"]; }
+  function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+  function img(name,p,ms){
+    var cv=document.createElement("canvas"); cv.width=600; cv.height=300;
+    var c=cv.getContext("2d"), g=G(ms), f="system-ui,-apple-system,Roboto,Arial,sans-serif";
+    var gr=c.createLinearGradient(0,0,600,300); gr.addColorStop(0,g[0]); gr.addColorStop(1,g[1]); c.fillStyle=gr; c.fillRect(0,0,600,300);
+    c.fillStyle="#fff"; c.textAlign="left"; c.font="800 38px "+f;
+    var n=name; while(n.length>1&&c.measureText(n).width>544) n=n.slice(0,-1); if(n!==name) n=n.trim()+"…";
+    c.fillText(n,28,70);
+    [[p.d,"ngày"],[String(p.h).padStart(2,"0"),"giờ"],[String(p.m).padStart(2,"0"),"phút"]].forEach(function(x,k){
+      var X=28+k*186; c.fillStyle="rgba(255,255,255,.2)"; rr(c,X,105,172,160,26); c.fill();
+      c.fillStyle="#fff"; c.textAlign="center"; c.font="800 76px "+f; c.fillText(x[0],X+86,190); c.font="400 26px "+f; c.fillText(x[1],X+86,238);
+    });
+    return cv.toDataURL("image/png");
+  }
+  function clearAll(){ navigator.serviceWorker.ready.then(function(r){ return r.getNotifications({tag:TAG}); }).then(function(l){ l.forEach(function(n){ n.close(); }); }).catch(function(){}); }
+  function show(){
+    if(!on()) return;
+    var now=Date.now(), up=load().map(function(i){return {i:i,ms:tgt(i)-now};}).filter(function(x){return x.ms>0;}).sort(function(a,b){return a.ms-b.ms;});
+    if(!up.length){ clearAll(); return; }
+    var f=up[0], p=pr(f.ms), body="Còn "+p.d+" ngày "+p.h+" giờ "+p.m+" phút";
+    up.slice(1,4).forEach(function(x){ var q=pr(x.ms); body+="\n"+x.i.name+": "+q.d+" ngày "+q.h+" giờ"; });
+    var o={body:body,icon:"icon-192.png",badge:"icon-192.png",tag:TAG,renotify:false,silent:true,requireInteraction:true,timestamp:now};
+    try{ o.image=img(f.i.name,p,f.ms); }catch(e){}
+    navigator.serviceWorker.ready.then(function(r){ return r.showNotification(f.i.name,o); }).catch(function(){});
+  }
+  bell.addEventListener("click",function(){
+    if(on()){ try{ localStorage.setItem(FLAG,"0"); }catch(e){} paint(); clearAll(); say("Đã tắt thông báo"); return; }
+    if(Notification.permission==="denied"){ say("Thông báo đang bị chặn trong cài đặt trang"); return; }
+    Notification.requestPermission().then(function(r){
+      if(r==="granted"){ try{ localStorage.setItem(FLAG,"1"); }catch(e){} paint(); show(); say("Đã bật thông báo"); }
+      else say("Chưa được cấp quyền thông báo");
+    });
+  });
+  paint(); show();
+  setInterval(show,60000);
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) show(); });
+  window.addEventListener("hashchange",show);
+})();
 </script>
 </body>
 </html>
