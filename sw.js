@@ -1,5 +1,5 @@
 importScripts("tb.js");
-var V="dem-nguoc-v9";
+var V="dem-nguoc-v10";
 var FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./badge-96.png","./notify-icon.png","./tb.js"];
 self.addEventListener("install",function(e){
   e.waitUntil(caches.open(V).then(function(c){
