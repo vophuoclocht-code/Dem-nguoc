@@ -91,7 +91,7 @@ li.tk.drag .hd{cursor:grabbing}
 li.tk.done .ck{background:var(--calm);border-color:var(--calm)}
 li.tk.done .t{text-decoration:line-through;color:var(--muted)}
 li.tk .t{cursor:pointer}
-form.tf{position:fixed;left:18px;right:18px;bottom:calc(96px + env(safe-area-inset-bottom,0px));grid-template-columns:1fr auto;gap:8px;background:var(--surface);border-radius:22px;padding:10px;box-shadow:0 8px 28px rgba(16,24,40,.22);max-width:524px;margin:0 auto;z-index:5}
+form.tf{grid-template-columns:minmax(0,1fr) auto;gap:8px;background:var(--surface);border-radius:18px;padding:10px;margin:0 0 12px;border:1px solid var(--line)}
 textarea{font:inherit;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;width:100%;min-height:110px;resize:vertical;line-height:1.5}
 textarea:focus{border-color:var(--calm);outline:none}
 .detail{margin-top:12px;background:var(--surface);border-radius:20px;padding:14px 16px 16px 20px;box-shadow:inset 5px 0 0 var(--c,var(--calm))}
@@ -105,9 +105,12 @@ textarea:focus{border-color:var(--calm);outline:none}
 .tadd{padding:0 20px;border:0;border-radius:14px;background:var(--calm);color:var(--onaccent);font-weight:600}
 .fab{position:fixed;right:20px;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--calm);color:var(--onaccent);display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:2rem;line-height:1;box-shadow:0 6px 18px rgba(37,99,235,.4)}
 
+#tfab{border-radius:20px;width:auto;min-width:60px;height:60px;padding:0 20px 0 16px;gap:8px;background:#0f766e;box-shadow:0 6px 16px rgba(15,118,110,.4);font-size:.95rem;font-weight:700;border:3px solid #fff}
+#tfab svg{flex:none}
+#tfab.open{background:var(--ink);box-shadow:0 6px 16px rgba(15,23,40,.35)}
 /* ===== tối ưu cho điện thoại ===== */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;font-size:16px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 button,a,[role=button]{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 main{padding:16px 16px 120px}
 h1{font-size:1.65rem;font-weight:800}
@@ -131,7 +134,6 @@ textarea{min-height:110px}
 .ck{position:relative}
 .ck::after{content:"";position:absolute;inset:-8px}
 .fab{width:60px;height:60px;box-shadow:0 6px 16px rgba(37,99,235,.35)}
-form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
 @media (max-width:380px){main{padding-left:12px;padding-right:12px}h1{font-size:1.5rem}li.k .r b{font-size:1.15rem}li.k .r span{margin-right:5px}}
 .th{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
 .th h1{margin:0}
@@ -139,7 +141,8 @@ form.tf{border:1px solid var(--line);box-shadow:0 8px 24px rgba(16,24,40,.16)}
 .bell.on{background:var(--calm);color:#fff}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));background:#0f1728;color:#fff;border-radius:99px;padding:10px 18px;font-size:.9rem;z-index:20;max-width:calc(100% - 32px);text-align:center}
 /* ===== v9: thanh tiến độ, nhiệm vụ lặp lại, khung thêm gọn ===== */
-html,body{max-width:100%;overflow-x:hidden}
+html,body{max-width:100%}
+body{overflow-x:clip}
 li.m{grid-template-columns:minmax(0,1fr) auto}
 .hero .row .name{min-width:0}
 .pg .seg{display:flex;flex:1 1 0;min-width:0}
@@ -153,9 +156,8 @@ li.tk .t{padding:6px 2px}
 .rpb{min-width:40px;height:40px;border:0;background:none;color:var(--muted);border-radius:12px;font-size:.85rem;font-weight:700;padding:0 6px;opacity:.45}
 .rpb.on{opacity:1;color:var(--calm)}
 li.tk.rp{background:color-mix(in srgb,var(--calm) calc(var(--lv,0)*40%),var(--surface));box-shadow:inset 4px 0 0 color-mix(in srgb,var(--calm) calc(30% + var(--lv,0)*70%),transparent)}
-form.tf{left:auto;right:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:min(340px,calc(100% - 32px));max-width:none;margin:0;padding:8px;gap:6px;border-radius:18px;grid-template-columns:minmax(0,1fr) auto}
-form.tf input{min-height:40px;padding:8px 12px;font-size:.95rem;border-radius:12px}
-form.tf .tadd{min-height:40px;padding:0 14px;border-radius:12px;font-size:.9rem}
+form.tf input{min-height:44px;padding:8px 12px;font-size:.95rem;border-radius:12px}
+form.tf .tadd{min-height:44px;padding:0 14px;border-radius:12px;font-size:.9rem}
 .rpt{grid-column:1/-1;justify-self:start;min-height:32px;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:99px;padding:4px 12px;font-size:.78rem;font-weight:600}
 .rpt[aria-pressed="true"]{background:var(--calm);border-color:var(--calm);color:var(--onaccent)}
 </style>
@@ -200,13 +202,13 @@ form.tf .tadd{min-height:40px;padding:0 14px;border-radius:12px;font-size:.9rem}
     <section class="hero" id="tk-head"></section>
     <section class="detail" id="tk-detail" hidden></section>
     <h2>Việc cần làm</h2>
-    <ul id="tasks"></ul>
     <form id="tf" class="tf" hidden><input id="tin" maxlength="100" required placeholder="Việc cần làm" aria-label="Việc cần làm" autocomplete="off"><button class="tadd" type="submit">Thêm</button><button class="rpt" id="trep" type="button" aria-pressed="true">↻ Lặp lại mỗi ngày</button></form>
+    <ul id="tasks"></ul>
   </section>
 </main>
 <div class="toast" id="toast" hidden></div>
 <a class="fab" id="fab" href="#them" aria-label="Thêm môn thi">+</a>
-<button class="fab" id="tfab" type="button" aria-label="Thêm việc" hidden>+</button>
+<button class="fab" id="tfab" type="button" aria-label="Thêm việc" hidden></button>
 
 <script>
 (function(){
@@ -307,7 +309,9 @@ form.tf .tadd{min-height:40px;padding:0 14px;border-radius:12px;font-size:.9rem}
   }
 
   function curExam(){ return items.filter(function(i){return i.id===taskId})[0]; }
-  function setAdd(open){ var b=$("tfab"); $("tf").hidden=!open; b.textContent=open?"×":"+"; b.setAttribute("aria-label",open?"Đóng":"Thêm việc"); if(open) $("tin").focus(); }
+  var ICON_ADD='<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l2 2 3-3"/><path d="M3 14l2 2 3-3"/><path d="M12 7h9"/><path d="M12 15h5"/><path d="M19 13v6"/><path d="M16 16h6"/></svg><span>Việc</span>';
+  var ICON_X='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Đóng</span>';
+  function setAdd(open){ var b=$("tfab"); $("tf").hidden=!open; b.innerHTML=open?ICON_X:ICON_ADD; b.classList.toggle("open",open); b.setAttribute("aria-label",open?"Đóng":"Thêm việc"); if(open){ $("tf").scrollIntoView({block:"center",behavior:"smooth"}); $("tin").focus({preventScroll:true}); } }
 
   var focusId=null;
   function moveTask(it,from,to,keep){ var t=it.tasks.splice(from,1)[0]; it.tasks.splice(to,0,t); if(keep) focusId=t.id; save(); renderTask(); }
